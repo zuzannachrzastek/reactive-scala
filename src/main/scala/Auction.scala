@@ -13,6 +13,7 @@ object Auction {
   case object Ignored
   case object Sold
   case object Deleted
+  case object OK
   case class Offer(price: Double)
   case class YouWon(item: String, price: Double)
   case class ItemSold(item: String)
@@ -28,7 +29,8 @@ class Auction(itemName: String) extends Actor {
 
   def receive = LoggingReceive {
     case Auction.Created =>
-      context.system.scheduler.scheduleOnce(2 seconds, self, Auction.TimeEnd)
+      sender ! Auction.OK
+      context.system.scheduler.scheduleOnce(7 seconds, self, Auction.TimeEnd)
       context become activated
   }
 
