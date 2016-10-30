@@ -1,4 +1,3 @@
-import AuctionSearch.Search
 import akka.actor.{Actor, ActorRef, PoisonPill}
 import akka.event.LoggingReceive
 
@@ -14,9 +13,9 @@ object Buyer {
 
 class Buyer(target: String, maxPrice: Double) extends Actor {
 
-  val auctionSearch = context.actorSelection("user/AuctionSearch")
+  val auctionSearch = context.actorSelection("/user/auctionSearch")
 
-  auctionSearch ! Search(target)
+  auctionSearch ! AuctionSearch.Search(target)
 
   val r = scala.util.Random
   var newBid = 0
@@ -29,21 +28,7 @@ class Buyer(target: String, maxPrice: Double) extends Actor {
       items.foreach(_ ! Buyer.offer(self, newBid))
       context become inProgress
 
-//    case Buyer.Created =>
-//      newBid = r.nextInt(100)
-//      println("Buyer bid to " + newBid)
-//      auctions.head ! Buyer.bid(self, newBid)
-//      context become awaitBid
-//  }
-
   def inProgress: Receive = LoggingReceive {
-//    case Auction.Active =>
-//      newBid = r.nextInt(100)
-//      println("Buyer bid to " + newBid)
-//      auctions.head ! Buyer.offer(self, newBid)
-
-//    case Auction.Sold =>
-//      context.system.terminate()
 
     case Auction.Beaten(price) =>
       offerInAuction(price, sender())
@@ -51,7 +36,7 @@ class Buyer(target: String, maxPrice: Double) extends Actor {
     case Auction.NotEnough(price) =>
       offerInAuction(price, sender())
 
-    case Auction.Sold(item) =>
+    case Auction.ItemSold(item) =>
       println(s"I not bought $item")
       bought += 1
       stopIfEnd()

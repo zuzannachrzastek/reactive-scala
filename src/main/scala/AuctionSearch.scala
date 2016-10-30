@@ -17,6 +17,7 @@ object AuctionSearch {
 class AuctionSearch extends Actor {
 
   val auctions = mutable.Map[String, ActorRef]()
+  println(s"${self.path} AuctionSearch created")
 
   def receive = LoggingReceive {
     case AuctionSearch.Register(name) =>

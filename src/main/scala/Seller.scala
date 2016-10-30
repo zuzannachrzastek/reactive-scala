@@ -15,7 +15,7 @@ object Seller {
 
 class Seller (titles: List[String]) extends Actor {
 
-  val auctionSearch = context.actorSelection("user/AuctionSearch").resolveOne(10 seconds)
+  val auctionSearch = context.actorSelection("/user/auctionSearch").resolveOne(1 seconds)
 
   var auctions = titles.map(title => {
     val auction = context.actorOf(Props(classOf[Auction], title), s"""${title.replaceAll(" ", "_")}_auction""")

@@ -12,13 +12,13 @@ object Auction {
   case object Active
   case object Ignored
   case object Sold
-  case object Inactive
   case object Deleted
   case class Offer(price: Double)
   case class YouWon(item: String, price: Double)
-  case class Sold(item: String)
+  case class ItemSold(item: String)
   case class Beaten(price: Double)
   case class NotEnough(price: Double)
+  case object TimeEnd
 }
 
 class Auction(itemName: String) extends Actor {
@@ -28,7 +28,7 @@ class Auction(itemName: String) extends Actor {
 
   def receive = LoggingReceive {
     case Auction.Created =>
-      context.system.scheduler.scheduleOnce(2 seconds, self, Auction.Inactive)
+      context.system.scheduler.scheduleOnce(2 seconds, self, Auction.TimeEnd)
       context become activated
   }
 
@@ -39,38 +39,34 @@ class Auction(itemName: String) extends Actor {
       winner = from
       sender ! Auction.Beaten(actualBid)
 
-    case Buyer.offer(from, _) =>
+    case Buyer.offer(from, newBid)if actualBid > newBid =>
       sender ! Auction.NotEnough(actualBid)
 
-    case Buyer.offer(from, newBid) =>
+    case Auction.TimeEnd =>
       println("auction ends")
-      actualBid = newBid
-      winner = from
-      sender ! Auction.YouWon(itemName, newBid)
-      context.system.scheduler.scheduleOnce(6 seconds, self, Auction.Deleted)
+      winner = sender
+      sender ! Auction.YouWon(itemName, actualBid)
+      context.system.scheduler.scheduleOnce(1 seconds, self, Auction.Deleted)
       context become sold
-
-    case Auction.Inactive =>
-      context.system.scheduler.scheduleOnce(1 seconds, self, Auction.Ignored)
-      context become ignored
   }
 
   def ignored: Receive = LoggingReceive {
 
-    case Auction.Ignored =>
+    case Auction.Deleted =>
       println("Timer for auction " + self.path + " stopped")
       println("Auction " + self.path + " ignored")
+      context.parent ! Seller.AuctionEnds(sold = false)
       context stop self
   }
 
   def sold: Receive = LoggingReceive {
     case Auction.Deleted =>
-      context.parent ! Seller.AuctionEnds(sold = false)
+      context.parent ! Seller.AuctionEnds(sold = true)
 
     case Auction.Sold =>
       println("Timer for auction " + self.path + " stopped")
       println("Auction " + self.path + " sold to " + winner.path + " for " + actualBid)
-      winner ! Auction.Sold
+      winner ! Auction.ItemSold(itemName)
   }
 }
 
