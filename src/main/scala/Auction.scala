@@ -15,6 +15,7 @@ object Auction {
   case object Deleted
   case object OK
   case object Unregistered
+  case object AuctionEnded
   case class Offer(price: Double)
   case class YouWon(item: String, price: Double)
   case class ItemSold(item: String)
@@ -63,7 +64,7 @@ class Auction(itemName: String, parent: ActorRef) extends Actor {
     case Auction.Deleted =>
       println("Timer for auction " + self.path + " stopped")
       println("Auction " + self.path + " ignored")
-      context.parent ! Seller.AuctionEnds(sold = false)
+      parent ! Seller.AuctionEnds(sold = false)
       context stop self
   }
 

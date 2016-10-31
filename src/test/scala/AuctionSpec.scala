@@ -1,4 +1,4 @@
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorSystem, Props, Scheduler}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by Zuzanna on 30.10.2016.
   */
 class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
-  with WordSpecLike with BeforeAndAfterAll with ImplicitSender{
+  with WordSpecLike with BeforeAndAfterAll with ImplicitSender {
 
   override def afterAll(): Unit = {
     system.terminate
@@ -42,7 +42,7 @@ class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
       val probe = TestProbe()
       val auction = system.actorOf(Props(classOf[Auction], "item", probe.ref))
 
-      var newBid = 15
+      val newBid = 15
       auction ! Auction.Created
       expectMsg(Auction.OK)
 

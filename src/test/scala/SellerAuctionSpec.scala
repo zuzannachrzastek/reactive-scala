@@ -22,10 +22,6 @@ class SellerAuctionSpec extends TestKit(ActorSystem("SellerSpec"))
 
       auction ! Auction.Created
       expectMsg(Auction.OK)
-
-//      within(13 seconds){
-//        expectMsg(Seller.AuctionEnds(false))
-//      }
     }
   }
 
@@ -36,20 +32,10 @@ class SellerAuctionSpec extends TestKit(ActorSystem("SellerSpec"))
       val auction = TestProbe()
       val seller = system.actorOf(Props(new Seller(List("auction1"))), "seller")
 
-      watch(seller)
-
       seller ! Auction.OK
       seller ! Seller.AuctionEnds(false)
 
-
-      expectTerminated(seller)
+      expectMsg(Auction.AuctionEnded)
     }
   }
-
 }
-
-//class MockedChild() extends Actor {
-//  def receive = {
-//
-//  }
-//}

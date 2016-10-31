@@ -36,6 +36,7 @@ class Seller (titles: List[String]) extends Actor {
         case true => println(s"${sender().path.name} sold item")
         case false => println(s"${sender().path.name} didn't sold")
       }
+      sender ! Auction.AuctionEnded
       auctions -= sender
       auctionSearch.map(_.tell(Unregister(auctions(sender())), sender()))
 
