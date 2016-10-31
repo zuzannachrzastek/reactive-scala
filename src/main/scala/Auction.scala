@@ -53,8 +53,12 @@ class Auction(itemName: String, parent: ActorRef) extends Actor {
 
     case Auction.TimeEnd =>
       println("auction ends")
-      winner = sender
-      sender ! Auction.YouWon(itemName, actualBid)
+
+      if(winner != null) {
+        winner ! Auction.YouWon(itemName, actualBid)
+        context.system.scheduler.scheduleOnce(1 seconds, self, Auction.Deleted)
+        context become ignored
+      }
       context.system.scheduler.scheduleOnce(1 seconds, self, Auction.Deleted)
       context become sold
   }
@@ -76,6 +80,9 @@ class Auction(itemName: String, parent: ActorRef) extends Actor {
       println("Timer for auction " + self.path + " stopped")
       println("Auction " + self.path + " sold to " + winner.path + " for " + actualBid)
       winner ! Auction.ItemSold(itemName)
+
+    case Auction.AuctionEnded =>
+      println("Auction ended")
   }
 }
 

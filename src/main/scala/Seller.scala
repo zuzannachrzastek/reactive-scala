@@ -43,6 +43,7 @@ class Seller (titles: List[String]) extends Actor {
       if (auctions.size == 0) {
         println(s"no auctions left, shutdown")
         self ! PoisonPill
+        context.system.terminate()
       }
   }
 }
