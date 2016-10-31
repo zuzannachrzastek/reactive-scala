@@ -24,7 +24,7 @@ object Auction {
 
 class Auction(itemName: String) extends Actor {
 
-  var actualBid: Double = 0
+  var actualBid: Double = 10
   var winner = ActorRef.noSender
 
   def receive = LoggingReceive {
@@ -32,6 +32,11 @@ class Auction(itemName: String) extends Actor {
       sender ! Auction.OK
       context.system.scheduler.scheduleOnce(7 seconds, self, Auction.TimeEnd)
       context become activated
+
+    case Auction.TimeEnd =>
+      println("Auction timeout")
+      context.system.scheduler.scheduleOnce(5 seconds, self, Auction.Deleted)
+      context become ignored
   }
 
   def activated: Receive = LoggingReceive {

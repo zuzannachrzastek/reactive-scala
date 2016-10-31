@@ -2,6 +2,9 @@ import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
   * Created by Zuzanna on 30.10.2016.
   */
@@ -13,11 +16,75 @@ class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
   }
 
   "An Auction" must {
+
+    val actualBid = 10
+
     "be created" in {
-      val auction = system.actorOf(Props(new Auction("hehe")))
+      val auction = system.actorOf(Props(new Auction("auction")))
 
       auction ! Auction.Created
       expectMsg(Auction.OK)
+    }
+
+    "get too small amount of money" in {
+      val auction = system.actorOf(Props(new Auction("auction")))
+
+      auction ! Auction.Created
+      expectMsg(Auction.OK)
+
+      auction ! Buyer.offer(self, 5)
+      expectMsg(Auction.NotEnough(actualBid))
+    }
+
+    "be beaten" in {
+      val auction = system.actorOf(Props(new Auction("auction")))
+
+      var newBid = 15
+      auction ! Auction.Created
+      expectMsg(Auction.OK)
+
+      auction ! Buyer.offer(self, newBid)
+      expectMsg(Auction.Beaten(newBid))
+    }
+
+    "ends with no buyers" in {
+      val auction = system.actorOf(Props(new Auction("auction")))
+
+      auction ! Auction.Created
+      expectMsg(Auction.OK)
+
+      auction ! Auction.TimeEnd
+      expectMsg(Auction.YouWon("auction", actualBid))
+    }
+
+    "ends with buyers" in {
+      val auction = system.actorOf(Props(new Auction("auction")))
+
+      val newBid1 = 15
+      val newBid2 = 20
+      val newBid3 = 19
+      val newBid4 = 40
+
+      auction ! Auction.Created
+      expectMsg(Auction.OK)
+
+      auction ! Buyer.offer(self, 5)
+      expectMsg(Auction.NotEnough(actualBid))
+
+      auction ! Buyer.offer(self, newBid1)
+      expectMsg(Auction.Beaten(newBid1))
+
+      auction ! Buyer.offer(self, newBid2)
+      expectMsg(Auction.Beaten(newBid2))
+
+      auction ! Buyer.offer(self, newBid3)
+      expectMsg(Auction.NotEnough(newBid2))
+
+      auction ! Buyer.offer(self, newBid4)
+      expectMsg(Auction.Beaten(newBid4))
+
+      auction ! Auction.TimeEnd
+      expectMsg(Auction.TimeEnd)
     }
   }
 }
