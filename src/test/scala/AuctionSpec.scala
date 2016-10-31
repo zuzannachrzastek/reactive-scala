@@ -1,5 +1,5 @@
 import akka.actor.{ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestKit}
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
 import scala.concurrent.duration._
@@ -20,14 +20,16 @@ class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
     val actualBid = 10
 
     "be created" in {
-      val auction = system.actorOf(Props(new Auction("auction")))
+      val probe = TestProbe()
+      val auction = system.actorOf(Props(classOf[Auction], "item", probe.ref))
 
       auction ! Auction.Created
       expectMsg(Auction.OK)
     }
 
     "get too small amount of money" in {
-      val auction = system.actorOf(Props(new Auction("auction")))
+      val probe = TestProbe()
+      val auction = system.actorOf(Props(classOf[Auction], "item", probe.ref))
 
       auction ! Auction.Created
       expectMsg(Auction.OK)
@@ -37,7 +39,8 @@ class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
     }
 
     "be beaten" in {
-      val auction = system.actorOf(Props(new Auction("auction")))
+      val probe = TestProbe()
+      val auction = system.actorOf(Props(classOf[Auction], "item", probe.ref))
 
       var newBid = 15
       auction ! Auction.Created
@@ -48,17 +51,19 @@ class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
     }
 
     "ends with no buyers" in {
-      val auction = system.actorOf(Props(new Auction("auction")))
+      val probe = TestProbe()
+      val auction = system.actorOf(Props(classOf[Auction], "item", probe.ref))
 
       auction ! Auction.Created
       expectMsg(Auction.OK)
 
       auction ! Auction.TimeEnd
-      expectMsg(Auction.YouWon("auction", actualBid))
+      expectMsg(Auction.YouWon("item", actualBid))
     }
 
     "ends with buyers" in {
-      val auction = system.actorOf(Props(new Auction("auction")))
+      val probe = TestProbe()
+      val auction = system.actorOf(Props(classOf[Auction], "item", probe.ref))
 
       val newBid1 = 15
       val newBid2 = 20
@@ -84,7 +89,7 @@ class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
       expectMsg(Auction.Beaten(newBid4))
 
       auction ! Auction.TimeEnd
-      expectMsg(Auction.TimeEnd)
+      expectMsg(Auction.YouWon("item", newBid4))
     }
   }
 }

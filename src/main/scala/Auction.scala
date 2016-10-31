@@ -22,7 +22,7 @@ object Auction {
   case object TimeEnd
 }
 
-class Auction(itemName: String) extends Actor {
+class Auction(itemName: String, parent: ActorRef) extends Actor {
 
   var actualBid: Double = 10
   var winner = ActorRef.noSender
@@ -68,7 +68,7 @@ class Auction(itemName: String) extends Actor {
 
   def sold: Receive = LoggingReceive {
     case Auction.Deleted =>
-      context.parent ! Seller.AuctionEnds(sold = true)
+      parent ! Seller.AuctionEnds(sold = true)
 
     case Auction.Sold =>
       println("Timer for auction " + self.path + " stopped")
