@@ -1,3 +1,4 @@
+import Auction.Unregistered
 import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
 
@@ -32,6 +33,7 @@ class AuctionSearch extends Actor {
     case AuctionSearch.Unregister(auctionName) =>
       println(s"unregistering auction $auctionName by actor ${sender()}")
       auctions -= auctionName
+      sender ! Unregistered
   }
 
 }

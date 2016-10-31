@@ -14,6 +14,7 @@ object Auction {
   case object Sold
   case object Deleted
   case object OK
+  case object Unregistered
   case class Offer(price: Double)
   case class YouWon(item: String, price: Double)
   case class ItemSold(item: String)

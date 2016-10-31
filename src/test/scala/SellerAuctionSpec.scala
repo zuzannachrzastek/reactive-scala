@@ -11,6 +11,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SellerAuctionSpec extends TestKit(ActorSystem("SellerSpec"))
   with WordSpecLike with BeforeAndAfterAll with ImplicitSender {
 
+  override def afterAll(): Unit = {
+    system.terminate
+  }
+
   "An Auction (child)" should {
     "be tested without Seller (parent)" in {
       val probe = TestProbe()
@@ -36,7 +40,7 @@ class SellerAuctionSpec extends TestKit(ActorSystem("SellerSpec"))
 
       seller ! Auction.OK
       seller ! Seller.AuctionEnds(false)
-      
+
 
       expectTerminated(seller)
     }
