@@ -58,7 +58,7 @@ class AuctionSpec extends TestKit(ActorSystem("AuctionSpec"))
       expectMsg(Auction.OK)
 
       auction ! Auction.TimeEnd
-      expectMsg(Auction.YouWon("item", actualBid))
+      expectMsg(Auction.Deleted)
     }
 
     "ends with buyers" in {

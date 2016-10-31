@@ -59,7 +59,7 @@ class Auction(itemName: String, parent: ActorRef) extends Actor {
         context.system.scheduler.scheduleOnce(1 seconds, self, Auction.Deleted)
         context become ignored
       }
-      context.system.scheduler.scheduleOnce(1 seconds, self, Auction.Deleted)
+      sender ! Auction.Deleted
       context become sold
   }
 

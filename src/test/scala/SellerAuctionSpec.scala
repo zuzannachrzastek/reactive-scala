@@ -2,8 +2,6 @@ import akka.actor.{Actor, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by Zuzanna on 31.10.2016.
