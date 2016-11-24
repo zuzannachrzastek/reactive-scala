@@ -22,12 +22,15 @@ object Auction {
   case class Beaten(price: Double)
   case class NotEnough(price: Double)
   case object TimeEnd
+  case class Notify(title: String, buyer: ActorRef, price: Double)
 }
 
 class Auction(itemName: String, parent: ActorRef) extends Actor {
 
   var actualBid: Double = 10
   var winner = ActorRef.noSender
+
+  val notifier = context.actorSelection("/user/notifier")
 
   def receive = LoggingReceive {
     case Auction.Created =>
@@ -47,6 +50,7 @@ class Auction(itemName: String, parent: ActorRef) extends Actor {
       actualBid = newBid
       winner = from
       sender ! Auction.Beaten(actualBid)
+      notifier ! Auction.Notify(itemName, sender, actualBid)
 
     case Buyer.offer(from, newBid)if actualBid > newBid =>
       sender ! Auction.NotEnough(actualBid)
@@ -56,6 +60,7 @@ class Auction(itemName: String, parent: ActorRef) extends Actor {
 
       if(winner != null) {
         winner ! Auction.YouWon(itemName, actualBid)
+        notifier ! Notifier.Done
         context.system.scheduler.scheduleOnce(1 seconds, self, Auction.Deleted)
         context become ignored
       }
