@@ -13,9 +13,9 @@ object Buyer {
 
 class Buyer(target: String, maxPrice: Double) extends Actor {
 
-  val auctionSearch = context.actorSelection("/user/auctionSearch")
+  val masterSearch = context.actorSelection("/user/masterSearch")
 
-  auctionSearch ! AuctionSearch.Search(target)
+  masterSearch ! MasterSearch.Search(target)
 
   val r = scala.util.Random
   var newBid = 0

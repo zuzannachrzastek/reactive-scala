@@ -9,9 +9,9 @@ import scala.collection.mutable
   */
 
 object AuctionSearch {
-  case class Search(phase: String)
+//  case class Search(phase: String)
   case class SearchResults(auctions: List[ActorRef])
-  case class Unregister(auctionName: String)
+//  case class Unregister(auctionName: String)
 //  case class Register(auctionName: String)
 }
 
@@ -25,12 +25,12 @@ class AuctionSearch extends Actor {
       println(s"registering auction $name by actor ${sender()}")
       auctions += name.toLowerCase -> sender
 
-    case AuctionSearch.Search(searchPhase) =>
+    case MasterSearch.Search(searchPhase) =>
       println(s"received search for $searchPhase request")
       val phase = searchPhase.toLowerCase
       sender ! AuctionSearch.SearchResults(auctions.filterKeys(_.contains(phase)).values.toList)
 
-    case AuctionSearch.Unregister(auctionName) =>
+    case MasterSearch.Unregister(auctionName) =>
       println(s"unregistering auction $auctionName by actor ${sender()}")
       auctions -= auctionName
       sender ! Unregistered
