@@ -12,7 +12,7 @@ object AuctionSearch {
   case class Search(phase: String)
   case class SearchResults(auctions: List[ActorRef])
   case class Unregister(auctionName: String)
-  case class Register(auctionName: String)
+//  case class Register(auctionName: String)
 }
 
 class AuctionSearch extends Actor {
@@ -21,7 +21,7 @@ class AuctionSearch extends Actor {
   println(s"${self.path} AuctionSearch created")
 
   def receive = LoggingReceive {
-    case AuctionSearch.Register(name) =>
+    case MasterSearch.Register(name) =>
       println(s"registering auction $name by actor ${sender()}")
       auctions += name.toLowerCase -> sender
 

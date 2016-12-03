@@ -1,4 +1,4 @@
-import AuctionSearch.{Register, Unregister}
+import MasterSearch.{Register, Unregister}
 import akka.actor.{Actor, ActorRef, PoisonPill, Props}
 import akka.event.LoggingReceive
 
@@ -15,11 +15,11 @@ object Seller {
 
 class Seller (titles: List[String]) extends Actor {
 
-  val auctionSearch = context.actorSelection("/user/auctionSearch").resolveOne(1 seconds)
+  val masterSearch = context.actorSelection("/user/masterSearch").resolveOne(1 seconds)
 
   var auctions = titles.map(title => {
     val auction = context.actorOf(Props(classOf[Auction], title, self), s"""${title.replaceAll(" ", "_")}_auction""")
-    auctionSearch.map(_.tell(Register(title), auction))
+    masterSearch.map(_.tell(Register(title), auction))
     auction ! Auction.Created
     auction -> title
   }).toMap
@@ -38,7 +38,7 @@ class Seller (titles: List[String]) extends Actor {
       }
       sender ! Auction.AuctionEnded
       auctions -= sender
-      auctionSearch.map(_.tell(Unregister(auctions(sender())), sender()))
+      masterSearch.map(_.tell(Unregister(auctions(sender())), sender()))
 
       if (auctions.size == 0) {
         println(s"no auctions left, shutdown")

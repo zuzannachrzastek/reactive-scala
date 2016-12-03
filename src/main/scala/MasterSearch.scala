@@ -8,6 +8,7 @@ import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, RoundRobinRoutingLog
 
 object MasterSearch {
   case class Register(auctionName: String)
+  case class Unregister(auctionName: String)
   case class Terminated(a: ActorRef)
 }
 
@@ -15,7 +16,7 @@ class MasterSearch extends Actor {
 
   val nbOfroutees: Int = 5
 
-  val routees = Vector.fill(routees) {
+  val routees = Vector.fill(nbOfroutees) {
     val r = context.actorOf(Props[AuctionSearch])
     context watch r
     ActorRefRoutee(r)
@@ -32,6 +33,7 @@ class MasterSearch extends Actor {
   def receive = LoggingReceive {
     case MasterSearch.Register(name) =>
       registerRouter.route(MasterSearch.Register(name), sender())
+      println()
 
     case MasterSearch.Terminated(a) =>
       registerRouter = registerRouter.removeRoutee(a)

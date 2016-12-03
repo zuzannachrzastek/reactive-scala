@@ -21,6 +21,7 @@ object Application extends App{
   val notifier = auctionSystem.actorOf(Props[Notifier], "notifier")
 
   notifier ! Notifier.Init
+  val masterSearch = auctionSystem.actorOf(Props[MasterSearch], "masterSearch")
   val auctionSearch = auctionSystem.actorOf(Props[AuctionSearch], "auctionSearch")
   val seller = auctionSystem.actorOf(Props(new Seller(titles)), "seller")
 
