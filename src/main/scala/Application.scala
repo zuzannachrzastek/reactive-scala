@@ -15,10 +15,6 @@ object Application extends App{
   val auctionpublishersystem = ActorSystem("AuctionSystem", config.getConfig("auctionpublishersystem").withFallback(config))
   val auctionPublisher = auctionpublishersystem.actorOf(Props[AuctionPublisher], "auctionPublisher")
 
-//  implicit val timeout = Timeout(3 seconds)
-//  val future = auctionPublisher ? AuctionPublisher.Init
-//  val result = Await.result(future, timeout.duration)
-
   auctionPublisher ! AuctionPublisher.Init
   val auctionSystem = ActorSystem("AuctionSystem", config.getConfig("auctionsystem").withFallback(config))
 
